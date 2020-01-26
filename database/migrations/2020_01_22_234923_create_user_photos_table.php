@@ -18,6 +18,7 @@ class CreateUserPhotosTable extends Migration
             $table->string('first_name');
             $table->string('surname');
             $table->string('password');
+            $table->string('phone');
             $table->string('token');
             $table->timestamps();
         });
