@@ -18,7 +18,8 @@ class CreatePhotosTable extends Migration
             $table->bigInteger('userphoto_id')->unsigned();
             $table->string('name');
             $table->string('url');
-            $table->integer('owner_id');
+            $table->string('owner_id');//migration reset 27/01
+            $table->boolean('shared')->default(false);//migration reset 26/01
             $table->json('users');
             $table->timestamps();
         });

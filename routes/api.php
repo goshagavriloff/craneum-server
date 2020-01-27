@@ -20,10 +20,10 @@ Route::post('/signup','UserPhotoController@signup');
 Route::post('/login','UserPhotoController@login');
 Route::post('/logout','UserPhotoController@logout');
 Route::post('/user','UserPhotoController@user');
-Route::post('/user/{id}/share','UserPhotoController@share');
+Route::post('/user/{ID}/share','UserPhotoController@share');
 
-Route::post('/photo','UserPhotoController@create');
-Route::post('/photo/{id}','UserPhotoController@update');
-Route::get('/photo','UserPhotoController@show');
-Route::get('/photo/{id}','UserPhotoController@index');
-Route::delete('/photo/{id}','UserPhotoController@destroy');
+Route::post('/photo','PhotoController@create');
+Route::post('/photo/{ID}','PhotoController@update');
+Route::get('/photo','PhotoController@show');
+Route::get('/photo/{ID}','PhotoController@index');
+Route::delete('/photo/{ID}','PhotoController@destroy');
