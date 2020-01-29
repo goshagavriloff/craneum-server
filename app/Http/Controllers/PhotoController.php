@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\File;
 use App\Photo;
 use App\UserPhoto;
+use App\Http\Resources\PhotoCollection;
 use Illuminate\Http\Request;
 
 class PhotoController extends Controller
@@ -16,10 +17,39 @@ class PhotoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Photo $photo,Request $request,$ID)
     {
+      $token = $request->bearerToken();
+      if ($token===null) {
+        $body =array ('Code'=>'403 Forbidden','content'=>array('message'=>'You need authorization'));
+        return json_encode($body);
+      } else {
+        $AuthUser=UserPhoto::where('token', $token)->first();
+        if ($AuthUser===null) {
+          $body =array ('Code'=>'404 Not found','content'=>array('token'=>'Incorrect token'));
+          return json_encode($body);
+        } else {
+          $SearchUserPhoto=$photo->where('userphoto_id',$AuthUser->id)->where('id',$ID)->first();
+
+          if ($SearchUserPhoto===null) {
+            $body =array ('Code'=>'403 Forbidden');
+            return json_encode($body);
+
+          } else {
+            $body= PhotoCollection::collection($photo->where('userphoto_id',$AuthUser->id)->where('id',$ID)->get());//
+
+            $arr = array( 'Code'=>200, //
+            'content'=>$body); //
+            return json_encode($arr); //
+
+          }
+
+
+        }
+      }
         //
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -97,9 +127,35 @@ class PhotoController extends Controller
      * @param  \App\Photo  $photo
      * @return \Illuminate\Http\Response
      */
-    public function show(Photo $photo)
+    public function show(Photo $photo,Request $request)
     {
-        //
+      $token = $request->bearerToken();
+      if ($token===null) {
+        $body =array ('Code'=>'403 Forbidden','content'=>array('message'=>'You need authorization'));
+        return json_encode($body);
+      } else {
+        $AuthUser=UserPhoto::where('token', $token)->first();
+        if ($AuthUser===null) {
+          $body =array ('Code'=>'404 Not found','content'=>array('token'=>'Incorrect token'));
+          return json_encode($body);
+        } else {
+          $SearchUserPhoto=$photo->where('userphoto_id',$AuthUser->id)->first();
+
+          if ($SearchUserPhoto===null) {
+            $body =array ('Code'=>'403 Forbidden');
+            return json_encode($body);
+
+          } else {
+            $body= PhotoCollection::collection($photo->where('userphoto_id',$AuthUser->id)->get());//
+
+            $arr = array( 'Code'=>200, //
+            'content'=>$body); //
+            return json_encode($arr); //
+
+          }
+
+        }
+      } //
     }
 
 
@@ -112,8 +168,8 @@ class PhotoController extends Controller
      */
     public function update(Request $request, Photo $photo,$ID)
     {
-      //@update from photocontroller,composer require harishpatel143/laravel-base64-validation
-      //truble with _method complete
+      //@update from photocontroller,composer require harishpatel143/laravel-base64-validation,migrate reset
+      //
       // src https://laracasts.com/discuss/channels/laravel/create-image-from-base64-string-laravel
       $token = $request->bearerToken();
       if ($token===null) {
