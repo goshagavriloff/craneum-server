@@ -265,8 +265,32 @@ class PhotoController extends Controller
      * @param  \App\Photo  $photo
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Photo $photo)
+    public function destroy(Request $request,Photo $photo,$ID)
     {
-        //
+      $token = $request->bearerToken();
+      if ($token===null) {
+        $body =array ('Code'=>'403 Forbidden','content'=>array('message'=>'You need authorization'));
+        return json_encode($body);
+      } else {
+        $AuthUser=UserPhoto::where('token', $token)->first();
+        if ($AuthUser===null) {
+          $body =array ('Code'=>'404 Not found','content'=>array('token'=>'Incorrect token'));
+          return json_encode($body);
+        } else {
+          $SearchUserPhoto=$photo->where('userphoto_id',$AuthUser->id)->where('id',$ID)->first();
+
+          if ($SearchUserPhoto===null) {
+            $body =array ('Code'=>'403 Forbidden');
+            return json_encode($body);
+
+          } else {
+            $SearchUserPhoto->delete();
+            $body =array ('Code'=>'204 Deleted');
+            return json_encode($body);
+
+          }
+
+        }
+      } //
     }
 }
