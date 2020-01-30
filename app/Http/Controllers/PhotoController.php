@@ -29,14 +29,17 @@ class PhotoController extends Controller
           $body =array ('Code'=>'404 Not found','content'=>array('token'=>'Incorrect token'));
           return json_encode($body);
         } else {
-          $SearchUserPhoto=$photo->where('userphoto_id',$AuthUser->id)->where('id',$ID)->first();
 
-          if ($SearchUserPhoto===null) {
+          $SearchUserPhoto=$photo->where('userphoto_id',$AuthUser->id)->where('id',$ID)->orwhere(function ($query) use($ID,$AuthUser) {
+            $query->where('id',$ID)->whereJsonContains('users',$AuthUser->id);
+          })->get();
+
+          if ($SearchUserPhoto->count()==null) {
             $body =array ('Code'=>'403 Forbidden');
             return json_encode($body);
 
           } else {
-            $body= PhotoCollection::collection($photo->where('userphoto_id',$AuthUser->id)->where('id',$ID)->get());//
+            $body= PhotoCollection::collection($SearchUserPhoto);//
 
             $arr = array( 'Code'=>200, //
             'content'=>$body); //
@@ -139,14 +142,14 @@ class PhotoController extends Controller
           $body =array ('Code'=>'404 Not found','content'=>array('token'=>'Incorrect token'));
           return json_encode($body);
         } else {
-          $SearchUserPhoto=$photo->where('userphoto_id',$AuthUser->id)->first();
+          $SearchUserPhoto=$photo->where('userphoto_id',$AuthUser->id)->orwhereJsonContains('users',$AuthUser->id)->first();
 
           if ($SearchUserPhoto===null) {
             $body =array ('Code'=>'403 Forbidden');
             return json_encode($body);
 
           } else {
-            $body= PhotoCollection::collection($photo->where('userphoto_id',$AuthUser->id)->get());//
+            $body= PhotoCollection::collection($photo->where('userphoto_id',$AuthUser->id)->orwhereJsonContains('users',$AuthUser->id)->get());//
 
             $arr = array( 'Code'=>200, //
             'content'=>$body); //
