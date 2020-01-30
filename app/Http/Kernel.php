@@ -60,6 +60,11 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'bearer_token'=>\App\Http\Middleware\CheckBearTokenPhotoUser::class,
+        'validate_login'=>\App\Http\Middleware\LoginValidator::class,
+        'validate_signup'=>\App\Http\Middleware\RegisterValidator::class,
+        'validate_load_photo'=>\App\Http\Middleware\CreatePhotoValidator::class,
+        'validate_update_photo'=>\App\Http\Middleware\UpdatePhotoValidator::class,
     ];
 
     /**
