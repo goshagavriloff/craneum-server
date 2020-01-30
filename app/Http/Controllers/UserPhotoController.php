@@ -8,6 +8,7 @@ use App\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Resources\PhotoCollection;
+use App\Http\Resources\UserPhotoCollection;
 
 class UserPhotoController extends Controller
 {
@@ -145,8 +146,35 @@ class UserPhotoController extends Controller
         }
       }
     }
-    public function users()
+    public function users(Request $request)
     {
-      return UserPhoto::all();// code...
+      $token = $request->bearerToken();
+      if ($token===null) {
+        $body =array ('Code'=>'403 Forbidden','content'=>array('message'=>'You need authorization'));
+        return json_encode($body);
+      } else {
+        $AuthUser=UserPhoto::where('token', $token)->first();
+        if ($AuthUser===null) {
+
+
+          $body =array ('Code'=>'404 Not found','content'=>array('token'=>'Incorrect token'));
+          return json_encode($body);
+        } else {
+
+                      $DataUsers  = $request->search;
+                      $pieces = explode(" ", $DataUsers);
+                      $get_seacrh=UserPhoto::where('first_name','like','%'.$pieces[0].'%')
+                                      ->orwhere('surname','like','%'.$pieces[1].'%')
+                                      ->orwhere('phone','like','%'.$pieces[2].'%')
+                                      ->get();// code...
+                      $body=UserPhotoCollection::collection($get_seacrh);
+                      $arr =array ('Code'=>'200 OK','content'=>$body);
+                      return json_encode($arr);
+
+
+        }
+      }
+
+
     }
 }
