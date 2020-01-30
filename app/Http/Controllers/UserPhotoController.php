@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Validator;
 use App\UserPhoto;
+use App\Photo;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Http\Resources\PhotoCollection;
 
 class UserPhotoController extends Controller
 {
@@ -87,12 +90,63 @@ class UserPhotoController extends Controller
       }
 
     }
-    public function share()
+    public function share(Request $request,UserPhoto $UserPhoto,$ID,Photo $photo)
     {
-      return UserPhoto::all();// code...
+      $token = $request->bearerToken();
+      if ($token===null) {
+        $body =array ('Code'=>'403 Forbidden','content'=>array('message'=>'You need authorization'));
+        return json_encode($body);
+      } else {
+        $AuthUser=UserPhoto::where('token', $token)->first();
+        if ($AuthUser===null) {
+
+
+          $body =array ('Code'=>'404 Not found','content'=>array('token'=>'Incorrect token'));
+          return json_encode($body);
+        } else {
+          $SearchUserPhoto=$photo
+                            ->where('userphoto_id',$AuthUser->id)
+                            ->whereIn('id',$request->photos)
+                            ->get();
+          $RequestPhotos=array_unique($request->photos);
+          $RequestPhotosCount=count($RequestPhotos);
+
+          if ($SearchUserPhoto->count()!=$RequestPhotosCount) {
+            $body =array ('Code'=>'403 Forbidden');
+            return json_encode($body);
+
+          } else {
+            foreach ($RequestPhotos as $request_photo) {
+              $SearchSharedPhoto=$photo
+                                ->where('userphoto_id',$AuthUser->id)
+                                ->where('id',$request_photo)
+                                ->first();
+
+
+              if ($SearchSharedPhoto->shared==null) {
+                $shared_users=json_decode($SearchSharedPhoto->users);
+                $shared_users[]=(int) $ID ;
+                $SearchSharedPhoto->users=json_encode(array_unique($shared_users));
+                $SearchSharedPhoto->save();
+
+              }
+            }
+
+            $body= PhotoCollection::collection($photo->whereIn('id',$request->photos)->get())->pluck('id');//);//
+
+                $arr = array( 'Code'=>'201 Created', //
+                'content'=>$body); //
+                return json_encode($arr); //
+
+        /*
+*/
+          }
+          ///////////////
+        }
+      }
     }
     public function users()
     {
-      // code...
+      return UserPhoto::all();// code...
     }
 }
